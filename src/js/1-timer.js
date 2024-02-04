@@ -3,7 +3,7 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 import 'flatpickr/dist/flatpickr.min.css';
 
-const startButton = document.querySelector('button')
+const startButton = document.querySelector('button');
 const inputData = document.querySelector('input#datetime-picker');
 const daysData = document.querySelector('[data-days]');
 const hoursData = document.querySelector('[data-hours]');
@@ -12,7 +12,8 @@ const secondsData = document.querySelector('[data-seconds]');
 const timer = document.querySelector(".timer");
 
 let userSelectedDate;
-  
+let timerIsRunning = false;
+
 const options = {
   enableTime: true,
   time_24hr: true,
@@ -32,19 +33,26 @@ const options = {
   },
 };
 
+startButton.disabled = true;
 
 let countdownInterval;
 
 function startTimer() {
+  if (timerIsRunning) {
+    return;
+  }
+
+  timerIsRunning = true;
   countdownInterval = setInterval(updateTimer, 1000, userSelectedDate);
+  startButton.disabled = true; // Заблокувати кнопку під час роботи таймеру
 };
 
 function updateTimer(endDate) {
   const currentDate = new Date();
   const remainingTime = endDate - currentDate;
   const { days, hours, minutes, seconds } = convertMs(remainingTime);
- 
-if (!isNaN(days) && !isNaN(hours) && !isNaN(minutes) && !isNaN(seconds)) {
+
+  if (!isNaN(days) && !isNaN(hours) && !isNaN(minutes) && !isNaN(seconds)) {
     daysData.textContent = addLeadingZero(days);
     hoursData.textContent = addLeadingZero(hours);
     minutesData.textContent = addLeadingZero(minutes);
@@ -56,26 +64,26 @@ if (!isNaN(days) && !isNaN(hours) && !isNaN(minutes) && !isNaN(seconds)) {
   }
 };
 
-startButton.addEventListener("click", ()=> {
-   if (userSelectedDate) {
-    startTimer(); 
+startButton.addEventListener("click", () => {
+  if (userSelectedDate && !timerIsRunning) {
+    startTimer();
   }
 });
 
 function stopTimer() {
   if (countdownInterval) {
-    
-  clearInterval(countdownInterval);
+    clearInterval(countdownInterval);
 
     daysData.textContent = '00';
     hoursData.textContent = '00';
     minutesData.textContent = '00';
     secondsData.textContent = '00';
-    
-    countdownInterval = null;
-  } 
-};
 
+    countdownInterval = null;
+    timerIsRunning = false;
+    startButton.disabled = false; // Розблокувати кнопку після зупинки таймеру
+  }
+};
 
 function addLeadingZero(value) {
   return String(value).padStart(2, '0');
